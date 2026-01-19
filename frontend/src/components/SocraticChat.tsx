@@ -53,9 +53,21 @@ export default function SocraticChat({ topic, phase, prompt }: SocraticChatProps
       });
 
       setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
-      setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having a little trouble thinking. Can you try again?" }]);
+      let errorMsg = "Sorry, I'm having a little trouble thinking. Can you try again?";
+      
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 503) {
+          errorMsg = "AI service unavailable: invalid or revoked API key. Please rotate your GOOGLE_API_KEY.";
+        } else if (error.response.status === 429) {
+          errorMsg = "The writing coach is a bit busy right now (Quota Limit). Please wait about 30 seconds and try again!";
+        } else if (error.response.data?.detail) {
+          errorMsg = `Server error: ${error.response.data.detail}`;
+        }
+      }
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsLoading(false);
     }

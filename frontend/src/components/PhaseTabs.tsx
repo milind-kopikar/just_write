@@ -50,6 +50,7 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
   const [writingContent, setWritingContent] = useState('');
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<EvaluationData | null>(null);
+  const [evaluationError, setEvaluationError] = useState<string | null>(null);
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [selectedPrompt, setSelectedPrompt] = useState<Prompt | null>(null);
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false);
@@ -115,14 +116,28 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
     setEvaluation(null);
 
     try {
+      setEvaluationError(null);
       const response = await axios.post(`${API_BASE_URL}/tutor/evaluate`, {
         text: writingContent,
         topic: topic,
         prompt: selectedPrompt?.prompt_text
       });
       setEvaluation(response.data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Evaluation error:", error);
+      if (axios.isAxiosError(error) && error.response) {
+        if (error.response.status === 503) {
+          setEvaluationError('AI service unavailable. Admins: rotate GOOGLE_API_KEY and check AI billing/permissions.');
+        } else if (error.response.status === 429) {
+          setEvaluationError('Google API quota reached. Please wait 1-2 minutes before trying to evaluate again.');
+        } else if (error.response.data?.detail) {
+          setEvaluationError(error.response.data.detail);
+        } else {
+          setEvaluationError('Evaluation failed due to server error.');
+        }
+      } else {
+        setEvaluationError('Network error. Please try again.');
+      }
     } finally {
       setIsEvaluating(false);
     }
@@ -336,6 +351,11 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
                 
                 {evaluation ? (
                   <div className="space-y-8 animate-in zoom-in duration-300">
+                    {evaluationError && (
+                      <div className="bg-red-50 border border-red-100 text-red-700 p-3 rounded mb-4">
+                        {evaluationError}
+                      </div>
+                    )}
                     <div className="bg-white rounded-2xl border-2 border-purple-100 shadow-sm overflow-hidden">
                       <div className="bg-purple-600 p-4 text-white flex justify-between items-center">
                         <h4 className="text-xl font-bold flex items-center">
@@ -455,6 +475,19 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
                 ) : (
                   <>
                     <p className="mb-4 text-gray-600 font-medium">Use what we learned to write your {topic.toLowerCase()} piece here!</p>
+                    
+                    {evaluationError && (
+                      <div className="bg-red-50 border-2 border-red-200 text-red-700 p-4 rounded-xl mb-6 flex items-start">
+                        <div className="bg-red-100 p-1 rounded-full mr-3 mt-0.5">
+                          <HelpCircle className="text-red-600" size={18} />
+                        </div>
+                        <div>
+                          <p className="font-bold">Check Failed</p>
+                          <p className="text-sm opacity-90">{evaluationError}</p>
+                        </div>
+                      </div>
+                    )}
+
                     <textarea 
                       value={writingContent}
                       onChange={(e) => setWritingContent(e.target.value)}

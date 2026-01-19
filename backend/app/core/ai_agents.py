@@ -5,16 +5,20 @@ from dotenv import load_dotenv
 from google import genai
 from .system_prompt import SYSTEM_PROMPT_WE_DO, SYSTEM_PROMPT_YOU_DO
 
-load_dotenv()
+# Load environment variables from the parent directory's .env file
+# This ensures it works regardless of whether the CWD is the project root or the backend folder
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
+load_dotenv(env_path)
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 def get_model(model_name: str = 'gemini-2.0-flash'):
     # Ensure key is in environment for pydantic-ai to pick up
-    if GOOGLE_API_KEY:
-        os.environ["GOOGLE_API_KEY"] = GOOGLE_API_KEY
-    else:
-        print("CRITICAL: GOOGLE_API_KEY not found!")
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if api_key:
+        os.environ["GOOGLE_API_KEY"] = api_key
+    elif not os.environ.get("GOOGLE_API_KEY"):
+        print("CRITICAL: GOOGLE_API_KEY not found in environment or .env file!")
     return GoogleModel(model_name)
 
 # Agent for "We Do" phase (Socratic Chat)
@@ -37,15 +41,25 @@ async def get_socratic_response(history, user_message, topic, prompt=None):
     # Convert simple history dicts to pydantic-ai messages if provided
     formatted_history = []
     if history:
-        for msg in history:
+        # Pydantic-AI/Gemini often expect history to start with a User message.
+        # If the first message is from the assistant (like a greeting), we can 
+        # either skip it or treat it as a response to a 'fake' user prompt.
+        # Here, we skip leading assistant messages to ensure valid alternating history.
+        start_idx = 0
+        while start_idx < len(history) and history[start_idx].get('role') == 'assistant':
+            start_idx += 1
+            
+        for i in range(start_idx, len(history)):
+            msg = history[i]
             role = msg.get('role')
             content = msg.get('content')
             if role == 'user':
                 formatted_history.append(ModelRequest(parts=[UserPromptPart(content=content)]))
             elif role == 'assistant':
+                # ModelResponse needs at least one part and a timestamp
                 formatted_history.append(ModelResponse(parts=[TextPart(content=content)], timestamp=datetime.now(timezone.utc)))
-
-    # Combine context
+    
+    # Combined context for the current user message
     ctx_parts = [f"Topic: {topic}"]
     if prompt:
         ctx_parts.append(f"Prompt: {prompt}")

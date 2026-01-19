@@ -71,20 +71,29 @@ async def chat(req: ChatRequest):
         return {"response": response}
     except Exception as e:
         import traceback
+        error_trace = traceback.format_exc()
         print(f"Chat Error: {str(e)}")
-        print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=str(e))
+        print(error_trace)
+        # Detect common API key / permission errors from GenAI and return a helpful status
+        msg = str(e)
+        if 'reported as leaked' in msg.lower():
+            raise HTTPException(status_code=503, detail="AI service unavailable: invalid or revoked API key. Rotate your GOOGLE_API_KEY and try again.")
+        
+        if '429' in msg or 'resource exhausted' in msg.lower():
+            raise HTTPException(status_code=429, detail="The AI is currently busy (Rate Limit). Please wait 30-60 seconds and try again.")
+            
+        raise HTTPException(status_code=500, detail=f"Internal error: {msg}")
 
 @router.post("/evaluate")
 async def evaluate(req: EvaluateRequest, db: Session = Depends(get_db)):
     try:
         print(f"Evaluating work for topic: {req.topic}")
         evaluation_raw = await evaluate_writing(req.text, req.topic, req.prompt)
-        
+
         # Try to parse JSON from the response
         import json
         import re
-        
+
         # Find JSON in backticks
         match = re.search(r'```json\s*(.*?)\s*```', evaluation_raw, re.DOTALL)
         if not match:
@@ -96,12 +105,20 @@ async def evaluate(req: EvaluateRequest, db: Session = Depends(get_db)):
         else:
             # Fallback if AI didn't return JSON
             return {"raw_text": evaluation_raw}
-            
+
     except Exception as e:
         import traceback
         print(f"Evaluation Error: {str(e)}")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=str(e))
+        msg = str(e)
+        if 'reported as leaked' in msg.lower():
+            # Return 503 so frontend can inform the developer/admin to rotate keys
+            raise HTTPException(status_code=503, detail="AI service unavailable: invalid or revoked API key. Rotate your GOOGLE_API_KEY and try again.")
+        
+        if '429' in msg or 'resource exhausted' in msg.lower():
+            raise HTTPException(status_code=429, detail="Google API quota reached. Please wait a minute before trying again.")
+
+        raise HTTPException(status_code=500, detail="Internal error evaluating writing")
 
 @router.get("/report-card")
 async def get_report_card(user_id: int = 1):
