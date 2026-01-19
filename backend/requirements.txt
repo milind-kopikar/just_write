@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pydantic
+pydantic-ai
+google-generativeai
+python-dotenv
+alembic
+passlib[bcrypt]
+python-jose[cryptography]
+email-validator
+reportlab
+pypdf

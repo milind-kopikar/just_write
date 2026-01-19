@@ -1,0 +1,13 @@
+{
+  "name": "just-write-root",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "start:frontend": "npm run dev --prefix frontend",
+    "start:backend": "npm run start:backend --prefix frontend",
+    "start": "concurrently \"npm run start:backend --prefix frontend\" \"npm run dev --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
