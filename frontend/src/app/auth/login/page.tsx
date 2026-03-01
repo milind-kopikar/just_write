@@ -33,7 +33,7 @@ export default function LoginPage() {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
-          <p className="text-gray-600">Sign in to Just Write</p>
+          <p className="text-gray-600">Sign in to Kopi Write</p>
         </div>
 
         {error && (
