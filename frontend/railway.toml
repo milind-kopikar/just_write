@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+
+[build.buildCommand]
+cmd = "npm ci && npm run build"
+
+[deploy]
+startCommand = "npm run start"
+healthcheckPath = "/"
+healthcheckTimeout = 60
+restartPolicyType = "on_failure"
