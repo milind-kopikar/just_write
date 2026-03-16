@@ -197,15 +197,21 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
                   <Youtube className="mr-2" /> Teacher Lesson: {phase}
                 </h3>
                 <div className="aspect-video bg-black rounded-xl overflow-hidden mb-6 shadow-xl">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={`https://www.youtube.com/embed/${lessonContent?.video_url || 'dQw4w9WgXcQ'}`}
-                    title="Teacher Lesson" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                  ></iframe>
+                  {lessonContent?.video_url ? (
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      src={`https://www.youtube.com/embed/${lessonContent.video_url}`}
+                      title="Teacher Lesson"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white text-center p-6">
+                      <p className="text-lg font-medium opacity-70">Video lesson coming soon for this topic.</p>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="bg-blue-50 p-6 rounded-xl border-l-4 border-blue-500 mb-8">
