@@ -42,11 +42,11 @@ function LandingPage() {
           <div className="w-10 h-10 overflow-hidden rounded-lg bg-white p-0.5 shadow-inner">
             <img
               src="/just_write_logo.jpg"
-              alt="Kopi Write Logo"
+              alt="Just Write Logo"
               className="object-cover w-full h-full rounded"
             />
           </div>
-          <span className="text-2xl font-black tracking-tight">Kopi Write</span>
+          <span className="text-2xl font-black tracking-tight">Just Write</span>
         </div>
         <div className="flex items-center space-x-3">
           <Link
@@ -71,7 +71,7 @@ function LandingPage() {
           <span className="text-blue-600">story to tell.</span>
         </h1>
         <p className="text-xl text-gray-600 max-w-xl mb-10">
-          Kopi Write is an AI-powered writing tutor for Grades 3–5. It guides students
+          Just Write is an AI-powered writing tutor for Grades 3–5. It guides students
           step-by-step from blank page to polished piece — with instant, rubric-aligned feedback.
         </p>
         <div className="flex flex-col sm:flex-row gap-4">
@@ -119,12 +119,12 @@ function LandingPage() {
       <section className="bg-gray-50 px-6 py-16">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl font-black text-gray-900 mb-2">See it in action</h2>
-          <p className="text-gray-500 mb-10">Watch how Kopi Write guides a student from idea to finished piece.</p>
+          <p className="text-gray-500 mb-10">Watch how Just Write guides a student from idea to finished piece.</p>
           <div className="relative w-full rounded-2xl overflow-hidden shadow-xl" style={{ paddingBottom: '56.25%' }}>
             <iframe
               className="absolute inset-0 w-full h-full"
               src="https://www.youtube.com/embed/OxQ7juEHNo4"
-              title="How Kopi Write works"
+              title="How Just Write works"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
@@ -145,7 +145,7 @@ function LandingPage() {
       </section>
 
       <footer className="py-6 text-center text-gray-400 text-sm bg-white">
-        Kopi Write AI Tutor — Empowering Every Writer
+        Just Write AI Tutor — Empowering Every Writer
       </footer>
     </div>
   );
@@ -183,11 +183,11 @@ export default function Home() {
           <div className="w-12 h-12 relative overflow-hidden rounded-lg shadow-inner bg-white p-0.5">
             <img
               src="/just_write_logo.jpg"
-              alt="Kopi Write Logo"
+              alt="Just Write Logo"
               className="object-cover w-full h-full rounded"
             />
           </div>
-          <h1 className="text-3xl font-black font-sans tracking-tight">Kopi Write</h1>
+          <h1 className="text-3xl font-black font-sans tracking-tight">Just Write</h1>
         </div>
 
         <div className="flex items-center space-x-6">
@@ -239,7 +239,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="p-4 text-center text-gray-500 text-sm">
-        Kopi Write AI Tutor — Empowering Every Writer
+        Just Write AI Tutor — Empowering Every Writer
       </footer>
     </div>
   );
