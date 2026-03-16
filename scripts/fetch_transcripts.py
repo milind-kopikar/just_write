@@ -18,7 +18,8 @@ sys.path.append(str(backend_dir))
 
 from app.database import SessionLocal, engine
 from app.models import VideoTranscript, Base
-from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import NoTranscriptFound, TranscriptsDisabled
 
 # ---------------------------------------------------------------------------
 # Import the same CURATED_VIDEOS dict so this script stays in sync
@@ -29,12 +30,14 @@ from seed_lessons_v2 import CURATED_VIDEOS
 
 Base.metadata.create_all(bind=engine)
 
+_yt_api = YouTubeTranscriptApi()  # v1.x requires an instance
+
 
 def fetch_transcript(video_id: str) -> str | None:
     """Return the full transcript text for a YouTube video ID, or None."""
     try:
-        segments = YouTubeTranscriptApi.get_transcript(video_id)
-        return " ".join(seg["text"] for seg in segments)
+        segments = _yt_api.fetch(video_id)
+        return " ".join(seg.text for seg in segments)
     except (NoTranscriptFound, TranscriptsDisabled):
         print(f"  [SKIP] No transcript available for {video_id}")
         return None
