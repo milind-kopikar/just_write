@@ -14,6 +14,7 @@ class ChatRequest(BaseModel):
     history: List[dict] = []
     topic: str
     prompt: Optional[str] = None
+    video_id: Optional[str] = None  # I-Do video the student just watched
 
 class EvaluateRequest(BaseModel):
     text: str
@@ -62,12 +63,21 @@ def get_lesson(
     return lesson
 
 @router.post("/chat")
-async def chat(req: ChatRequest):
+async def chat(req: ChatRequest, db: Session = Depends(get_db)):
     try:
-        print(f"Chat request for topic: {req.topic}")
-        # Only pass history up to the last 10 messages to keep it efficient
+        print(f"Chat request for topic: {req.topic}, video_id: {req.video_id}")
         history = req.history[-10:] if req.history else []
-        response, _ = await get_socratic_response(history, req.message, req.topic, req.prompt)
+
+        # Look up the transcript for the I-Do video the student watched
+        transcript = None
+        if req.video_id:
+            row = db.query(models.VideoTranscript).filter_by(video_id=req.video_id).first()
+            if row:
+                transcript = row.transcript_text
+
+        response, _ = await get_socratic_response(
+            history, req.message, req.topic, req.prompt, transcript=transcript
+        )
         return {"response": response}
     except Exception as e:
         import traceback

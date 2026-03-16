@@ -48,6 +48,13 @@ class StudentScore(Base):
     
     user = relationship("User")
 
+class VideoTranscript(Base):
+    __tablename__ = "video_transcripts"
+    id = Column(Integer, primary_key=True, index=True)
+    video_id = Column(String, unique=True, index=True, nullable=False)
+    transcript_text = Column(Text, nullable=False)
+    fetched_at = Column(DateTime, default=datetime.datetime.utcnow)
+
 class WritingProject(Base):
     __tablename__ = "writing_projects"
     id = Column(Integer, primary_key=True, index=True)

@@ -56,13 +56,16 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
   const [isLoadingPrompts, setIsLoadingPrompts] = useState(false);
   const [lessonContent, setLessonContent] = useState<LessonContent | null>(null);
   const [isLoadingLesson, setIsLoadingLesson] = useState(false);
+  // Persists the I-Do video ID so We-Do can use it for transcript-based coaching
+  const [lessonVideoId, setLessonVideoId] = useState<string | null>(null);
 
   React.useEffect(() => {
     // Reset selection when changing phase or topic
     setSelectedPrompt(null);
     setPrompts([]);
     setLessonContent(null);
-    
+    setLessonVideoId(null);
+
     if (user) {
       if (activeSub === 'we-do' || activeSub === 'you-do') {
         fetchPrompts();
@@ -102,6 +105,10 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
         headers: { Authorization: `Bearer ${token}` }
       });
       setLessonContent(response.data);
+      // Remember the video ID so We-Do coaching can reference the transcript
+      if (response.data?.video_url) {
+        setLessonVideoId(response.data.video_url);
+      }
     } catch (error) {
       console.error("Error fetching lesson:", error);
     } finally {
@@ -292,7 +299,7 @@ export default function PhaseTabs({ phase, topic }: PhaseTabsProps) {
                   <HelpCircle className="mr-2" /> Chat with Writing Coach
                 </h3>
                 <div className="h-[500px] border-2 border-green-100 rounded-2xl overflow-hidden shadow-sm">
-                  <SocraticChat topic={topic} phase={phase} prompt={selectedPrompt.prompt_text} />
+                  <SocraticChat topic={topic} phase={phase} prompt={selectedPrompt.prompt_text} videoId={lessonVideoId ?? undefined} />
                 </div>
               </div>
             )}

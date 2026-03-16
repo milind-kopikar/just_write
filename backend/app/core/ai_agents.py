@@ -36,19 +36,23 @@ evaluation_agent = Agent(
 from pydantic_ai.messages import ModelRequest, ModelResponse, TextPart, UserPromptPart
 from datetime import datetime, timezone
 
-async def get_socratic_response(history, user_message, topic, prompt=None):
-    """Gets a Socratic response for the 'We Do' phase."""
+async def get_socratic_response(history, user_message, topic, prompt=None, transcript=None):
+    """Gets a Socratic response for the 'We Do' phase.
+
+    If a transcript is provided it is injected as lesson context so the AI
+    coach can base its exercises and questions on what the student just watched.
+    """
     # Convert simple history dicts to pydantic-ai messages if provided
     formatted_history = []
     if history:
         # Pydantic-AI/Gemini often expect history to start with a User message.
-        # If the first message is from the assistant (like a greeting), we can 
+        # If the first message is from the assistant (like a greeting), we can
         # either skip it or treat it as a response to a 'fake' user prompt.
         # Here, we skip leading assistant messages to ensure valid alternating history.
         start_idx = 0
         while start_idx < len(history) and history[start_idx].get('role') == 'assistant':
             start_idx += 1
-            
+
         for i in range(start_idx, len(history)):
             msg = history[i]
             role = msg.get('role')
@@ -58,14 +62,22 @@ async def get_socratic_response(history, user_message, topic, prompt=None):
             elif role == 'assistant':
                 # ModelResponse needs at least one part and a timestamp
                 formatted_history.append(ModelResponse(parts=[TextPart(content=content)], timestamp=datetime.now(timezone.utc)))
-    
+
     # Combined context for the current user message
     ctx_parts = [f"Topic: {topic}"]
+    if transcript:
+        # Trim to ~3000 words to stay within context limits
+        words = transcript.split()
+        trimmed = " ".join(words[:3000])
+        ctx_parts.append(
+            f"Lesson Transcript (from the I-Do video the student just watched — "
+            f"use this to craft exercises and questions based on what was taught):\n{trimmed}"
+        )
     if prompt:
-        ctx_parts.append(f"Prompt: {prompt}")
+        ctx_parts.append(f"Writing Prompt: {prompt}")
     ctx_parts.append(f"Student says: {user_message}")
-    
-    ctx_message = "\n".join(ctx_parts)
+
+    ctx_message = "\n\n".join(ctx_parts)
     result = await we_do_agent.run(ctx_message, message_history=formatted_history)
     return result.output, result.new_messages()
 

@@ -12,9 +12,10 @@ interface SocraticChatProps {
   topic: string;
   phase: string;
   prompt?: string;
+  videoId?: string;  // I-Do video ID — used to pull the lesson transcript for coaching
 }
 
-export default function SocraticChat({ topic, phase, prompt }: SocraticChatProps) {
+export default function SocraticChat({ topic, phase, prompt, videoId }: SocraticChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     { 
       role: 'assistant', 
@@ -49,7 +50,8 @@ export default function SocraticChat({ topic, phase, prompt }: SocraticChatProps
         message: userMsg,
         history: messages.map(m => ({ role: m.role, content: m.content })),
         topic: topic,
-        prompt: prompt
+        prompt: prompt,
+        video_id: videoId ?? null,
       });
 
       setMessages(prev => [...prev, { role: 'assistant', content: response.data.response }]);

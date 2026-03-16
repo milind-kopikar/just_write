@@ -12,3 +12,4 @@ python-jose[cryptography]
 email-validator
 reportlab
 pypdf
+youtube-transcript-api
