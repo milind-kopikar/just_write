@@ -12,7 +12,7 @@ load_dotenv(env_path)
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-def get_model(model_name: str = 'gemini-1.5-flash'):
+def get_model(model_name: str = 'gemini-2.5-flash-lite'):
     # Ensure key is in environment for pydantic-ai to pick up
     api_key = os.getenv("GOOGLE_API_KEY")
     if api_key:
