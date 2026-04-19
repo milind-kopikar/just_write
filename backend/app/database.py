@@ -13,9 +13,13 @@ if env_path.exists():
 else:
     load_dotenv()
 
-# Updated with user-provided credentials
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://milind:Rahul1978!@127.0.0.1:5432/just_write")
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL environment variable is required. "
+        "Set it in backend/.env for local dev or in the platform's environment for deploys."
+    )
+if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 engine = create_engine(
